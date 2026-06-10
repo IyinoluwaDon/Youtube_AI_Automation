@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube AI Automation</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="container">
+
+    <h1>YouTube AI Automation</h1>
+
+    <div class="card">
+
+        <input
+            type="text"
+            id="niche"
+            placeholder="Enter niche"
+        >
+
+        <button onclick="generateVideo()">
+            Generate Video
+        </button>
+
+    </div>
+
+    <div id="loading" style="display:none;">
+        Generating Video...
+    </div>
+
+    <div id="result"></div>
+
+</div>
+
+<!-- Load script once, at the end of body -->
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+venv/
+.env
+client_secret.json
+token.json
+logs/
+artifacts/audio/*
+artifacts/rendered_videos/*
+artifacts/stock_videos/*
+artifacts/subtitles/*
+artifacts/thumbnails/*
+artifacts/scripts/*
