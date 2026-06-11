@@ -1,38 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>YouTube AI Automation</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        YouTube AI Automation
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css"
+    >
+
 </head>
+
 <body>
+
 <div class="container">
 
-    <h1>YouTube AI Automation</h1>
+    <h1>
+        YouTube AI Automation
+    </h1>
+
+    <p class="subtitle">
+        Generate AI-Powered YouTube Shorts Automatically
+    </p>
 
     <div class="card">
 
         <input
             type="text"
             id="niche"
-            placeholder="Enter niche"
+            placeholder="Enter niche (e.g. Artificial Intelligence)"
         >
 
-        <button onclick="generateVideo()">
+        <button
+            id="generateBtn"
+            onclick="generateVideo()"
+        >
             Generate Video
         </button>
 
     </div>
 
-    <div id="loading" style="display:none;">
-        Generating Video...
+    <!-- Progress Section -->
+
+    <div
+        id="progressSection"
+        style="display:none;"
+    >
+
+        <h3>
+            Pipeline Progress
+        </h3>
+
+        <div class="progress-bar">
+
+            <div
+                id="progressFill"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+        <p id="progressText">
+            Starting...
+        </p>
+
     </div>
 
-    <div id="result"></div>
+    <!-- Result Section -->
+
+    <div
+        id="result"
+        style="display:none;"
+    >
+
+        <h2 id="videoTitle">
+        </h2>
+
+        <video
+            id="videoPlayer"
+            width="600"
+            controls
+        >
+        </video>
+
+        <br><br>
+
+        <a
+            id="youtubeLink"
+            href="#"
+            target="_blank"
+        >
+        </a>
+
+    </div>
 
 </div>
 
-<!-- Load script once, at the end of body -->
 <script src="/static/js/app.js"></script>
 
 </body>
+
 </html>

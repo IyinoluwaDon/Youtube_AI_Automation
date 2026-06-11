@@ -1,103 +1,214 @@
 async function generateVideo() {
 
-    const niche =
-        document.getElementById("niche").value;
+    const niche = document
+        .getElementById("niche")
+        .value
+        .trim();
 
-    const resultDiv =
-        document.getElementById("result");
+    if (!niche) {
 
-    const loadingDiv =
-        document.getElementById("loading");
-
-    if (!niche.trim()) {
-
-        resultDiv.innerHTML = `
-        <div style="color:red">
-            Please enter a niche
-        </div>
-        `;
+        alert("Please enter a niche");
 
         return;
     }
 
-    loadingDiv.style.display = "block";
+    const generateBtn =
+        document.getElementById(
+            "generateBtn"
+        );
 
-    resultDiv.innerHTML = "";
+    const progressSection =
+        document.getElementById(
+            "progressSection"
+        );
+
+    const progressFill =
+        document.getElementById(
+            "progressFill"
+        );
+
+    const progressText =
+        document.getElementById(
+            "progressText"
+        );
+
+    const resultSection =
+        document.getElementById(
+            "result"
+        );
+
+    generateBtn.disabled = true;
+
+    progressSection.style.display =
+        "block";
+
+    resultSection.style.display =
+        "none";
+
+    progressFill.style.width =
+        "0%";
+
+    progressText.innerText =
+        "Starting Pipeline...";
+
+    const stages = [
+
+        {
+            pct: 10,
+            text: "Generating Idea..."
+        },
+
+        {
+            pct: 25,
+            text: "Writing Script..."
+        },
+
+        {
+            pct: 45,
+            text: "Generating Voice..."
+        },
+
+        {
+            pct: 65,
+            text: "Downloading Videos..."
+        },
+
+        {
+            pct: 80,
+            text: "Generating Subtitles..."
+        },
+
+        {
+            pct: 95,
+            text: "Rendering Video..."
+        }
+    ];
+
+    let stageIndex = 0;
+
+    const interval = setInterval(() => {
+
+        if (
+            stageIndex <
+            stages.length
+        ) {
+
+            progressFill.style.width =
+                stages[
+                    stageIndex
+                ].pct + "%";
+
+            progressText.innerText =
+                stages[
+                    stageIndex
+                ].text;
+
+            stageIndex++;
+        }
+
+    }, 2500);
 
     try {
+
+        console.log(
+            "Calling backend..."
+        );
 
         const response =
             await fetch(
                 "/api/content/generate",
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                         "application/json"
                     },
+
                     body: JSON.stringify({
-                        niche
+
+                        niche: niche
                     })
                 }
             );
 
+        if (!response.ok) {
+
+            const errorText =
+                await response.text();
+
+            throw new Error(
+                errorText
+            );
+        }
+
         const data =
             await response.json();
 
-        loadingDiv.style.display =
-            "none";
+        console.log(data);
 
-        if (!response.ok) {
+        clearInterval(
+            interval
+        );
 
-            resultDiv.innerHTML = `
-            <div style="color:red;">
-                <h3>Error</h3>
-                <pre>
-${JSON.stringify(data,null,2)}
-                </pre>
-            </div>
-            `;
+        progressFill.style.width =
+            "100%";
 
-            return;
-        }
+        progressText.innerText =
+            "Video Generated Successfully";
 
-        resultDiv.innerHTML = `
+        resultSection.style.display =
+            "block";
 
-        <div class="result-card">
+        document
+            .getElementById(
+                "videoTitle"
+            )
+            .innerText =
+            data.title ||
+            "Generated Video";
 
-            <h2>${data.title}</h2>
+        const videoPlayer =
+            document
+            .getElementById(
+                "videoPlayer"
+            );
 
-            <p>
-                <strong>Status:</strong>
-                ${data.status}
-            </p>
+        videoPlayer.src =
+            data.video_path;
 
-            <p>
-                <strong>Video:</strong>
-                ${data.video_path}
-            </p>
+        videoPlayer.load();
 
-            <p>
-                <strong>YouTube:</strong>
-                <a href="${data.youtube_url}"
-                   target="_blank">
-                   Open Video
-                </a>
-            </p>
+        const youtubeLink =
+            document
+            .getElementById(
+                "youtubeLink"
+            );
 
-        </div>
+        youtubeLink.href =
+            data.youtube_url;
 
-        `;
+        youtubeLink.innerText =
+            "Watch On YouTube";
 
-    } catch(error){
+    } catch (error) {
 
-        loadingDiv.style.display =
-            "none";
+        clearInterval(
+            interval
+        );
 
-        resultDiv.innerHTML = `
-        <div style="color:red">
-            ${error}
-        </div>
-        `;
+        console.error(
+            error
+        );
+
+        progressText.innerText =
+            "Pipeline Failed";
+
+        alert(
+            "Error:\n\n" +
+            error.message
+        );
     }
+
+    generateBtn.disabled = false;
 }

@@ -39,13 +39,26 @@ async def generate_video(
 
             "title": result["idea"]["title"],
 
-            "video_path": result["video"],
+            "video_path":
+            "/" + str(
+                result["video"]
+            ).replace(
+                "\\",
+                "/"
+            ),
 
-            "youtube_id": result["youtube_id"],
+            "youtube_id":
+            result.get(
+                "youtube_id",
+                ""
+            ),
 
-            "youtube_url": result["youtube_url"]
+            "youtube_url":
+            result.get(
+                "youtube_url",
+                ""
+            )
         }
-
     except Exception as e:
 
         raise HTTPException(
