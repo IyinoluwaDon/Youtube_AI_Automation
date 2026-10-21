@@ -5,8 +5,6 @@ class Settings(BaseSettings):
 
     GEMINI_API_KEY: str
 
-    PEXELS_API_KEY: str
-
     PIXABAY_API_KEY: str
 
     YOUTUBE_CLIENT_SECRET_FILE: str

@@ -28,7 +28,8 @@ async def generate_video(
         result = await loop.run_in_executor(
             None,
             pipeline.run,
-            request.niche
+            request.niche,
+            request.video_format
         )
 
         return {
@@ -36,6 +37,8 @@ async def generate_video(
             "status": "success",
 
             "niche": request.niche,
+
+            "video_format": request.video_format,
 
             "title": result["idea"]["title"],
 

@@ -10,7 +10,7 @@ class StockVideoService:
 
     def __init__(self):
 
-        self.api_key = settings.PEXELS_API_KEY
+        self.api_key = settings.PIXABAY_API_KEY
 
     def _download_file(
         self,
@@ -35,41 +35,53 @@ class StockVideoService:
 
         return filepath
 
-    def fetch_pexels_video(self, keyword):
+    def fetch_pixabay_video(self, keyword, orientation):
         try:
             response = requests.get(
-                "https://api.pexels.com/videos/search",
-                headers={"Authorization": self.api_key},
-                params={"query": keyword, "per_page": 1, "orientation": "portrait"},
+                "https://pixabay.com/api/videos/",
+                params={
+                    "key": self.api_key,
+                    "q": keyword,
+                    "per_page": 3,
+                    "orientation": orientation
+                },
                 timeout=20
             )
             response.raise_for_status()
-            videos = response.json().get("videos", [])
+            videos = response.json().get("hits", [])
 
             if not videos:
-                logger.warning(f"Pexels: no results for keyword '{keyword}'")  # ← add this
+                logger.warning(f"Pixabay: no results for keyword '{keyword}'")
                 return None
 
-            files = sorted(videos[0]["video_files"], key=lambda x: x.get("height", 0), reverse=True)
-            return files[0]["link"]
+            video_variants = videos[0].get("videos", {})
+            for size in ("medium", "small", "tiny"):
+                video = video_variants.get(size)
+                if video and video.get("url"):
+                    return video["url"]
 
-        except Exception as e:
-            logger.error(f"Pexels Error for '{keyword}': {e}")  # ← include keyword
+            logger.warning(
+                f"Pixabay: no usable video URL for keyword '{keyword}'"
+            )
             return None
 
-    def download_clips(self, keywords: list):
+        except Exception as e:
+            logger.error(f"Pixabay Error for '{keyword}': {e}")
+            return None
+
+    def download_clips(self, keywords: list, orientation: str):
         clips = []
         output_dir = Path("artifacts/stock_videos")
         output_dir.mkdir(parents=True, exist_ok=True)
 
         for idx, keyword in enumerate(keywords, start=1):
-            url = self.fetch_pexels_video(keyword)
+            url = self.fetch_pixabay_video(keyword, orientation)
 
             # Fallback: try simpler/broader keyword
             if not url:
                 fallback = keyword.split()[0]  # first word only
                 logger.warning(f"Retrying with fallback keyword: '{fallback}'")
-                url = self.fetch_pexels_video(fallback)
+                url = self.fetch_pixabay_video(fallback, orientation)
 
             if not url:
                 logger.warning(f"Skipping keyword '{keyword}' — no video found")

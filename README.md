@@ -67,7 +67,7 @@ This project compresses all of that into a single button click.
 1. Automate idea generation using Google Gemini AI
 2. Generate structured voiceover scripts automatically
 3. Convert script to natural speech using Kokoro TTS
-4. Source relevant stock footage from Pexels API
+4. Source relevant stock footage from Pixabay API
 5. Generate and burn subtitles into the final video
 6. Render complete videos using MoviePy and FFmpeg
 7. Upload directly to YouTube via the Data API v3
@@ -101,7 +101,7 @@ This project compresses all of that into a single button click.
 │        Service  │  Service  │   Service        │
 └────────┬────────┴─────┬─────┴─────────────────┘
          │              │
-  [Gemini AI]   [Pexels API + FFmpeg + YouTube API]
+  [Gemini AI]   [Pixabay API + FFmpeg + YouTube API]
 ```
 
 ### Data Flow — Step by Step
@@ -112,7 +112,7 @@ This project compresses all of that into a single button click.
 | 2 | `idea_service` → Gemini generates JSON idea (title, hook, keywords) |
 | 3 | `script_service` → Gemini generates full narration script |
 | 4 | `voice_service` → Kokoro TTS converts script to MP3 audio |
-| 5 | `stock_video_service` → Downloads relevant MP4 clips from Pexels |
+| 5 | `stock_video_service` → Downloads relevant MP4 clips from Pixabay |
 | 6 | `subtitle_service` → Generates timed `.SRT` subtitle file |
 | 7 | `video_service` → MoviePy assembles clips + audio → raw MP4 |
 | 8 | `video_service` → FFmpeg burns subtitles into video → final MP4 |
@@ -161,7 +161,7 @@ Youtube_AI_Automation/
 │   │   ├── idea_service.py         # Pipeline Step 1: idea generation
 │   │   ├── script_service.py       # Pipeline Step 2: script writing
 │   │   ├── voice_service.py        # Pipeline Step 3: text-to-speech
-│   │   ├── stock_video_service.py  # Pipeline Step 4: Pexels footage
+│   │   ├── stock_video_service.py  # Pipeline Step 4: Pixabay footage
 │   │   ├── subtitle_service.py     # Pipeline Step 5: SRT generation
 │   │   ├── video_service.py        # Pipeline Steps 6+7: render + burn
 │   │   ├── youtube_service.py      # Pipeline Step 8: upload
@@ -182,7 +182,7 @@ Youtube_AI_Automation/
 │
 ├── artifacts/                      # ⚠️ Runtime-generated, not committed
 │   ├── audio/                      # MP3 files from Kokoro TTS
-│   ├── stock_videos/               # MP4 clips from Pexels
+│   ├── stock_videos/               # MP4 clips from Pixabay
 │   ├── subtitles/                  # .SRT subtitle files
 │   └── rendered_videos/            # Final output videos
 │
@@ -205,7 +205,7 @@ Youtube_AI_Automation/
 | `idea_service.py` | Step 1 — AI idea generation | Essential |
 | `script_service.py` | Step 2 — AI script writing | Essential |
 | `voice_service.py` | Step 3 — Text-to-speech | Essential |
-| `stock_video_service.py` | Step 4 — Pexels footage | Essential |
+| `stock_video_service.py` | Step 4 — Pixabay footage | Essential |
 | `subtitle_service.py` | Step 5 — SRT generation | Essential |
 | `youtube_service.py` | Step 8 — YouTube upload | Essential |
 | `ffmpeg_utils.py` | FFmpeg subprocess wrappers | Supporting |
@@ -228,7 +228,7 @@ Youtube_AI_Automation/
 | **MoviePy** | Video assembly | Python-native video editing API | OpenCV (lower level) |
 | **FFmpeg** | Subtitle burning + encoding | Industry standard, handles what MoviePy can't | — |
 | **imageio-ffmpeg** | Bundled FFmpeg binary | No manual OS install needed | System FFmpeg |
-| **Pexels API** | Stock footage | Free, royalty-free, reliable API | Pixabay, Unsplash Video |
+| **Pixabay API** | Stock footage | Free, royalty-free, reliable API | Pexels, Unsplash Video |
 | **YouTube Data API v3** | Video upload | Official API, OAuth 2.0 | — |
 | **Pydantic** | Data validation | Built into FastAPI, eliminates boilerplate | Marshmallow |
 | **python-dotenv** | Config loading | Simple `.env` file parsing | os.environ directly |
@@ -283,7 +283,7 @@ Passes the script string to Kokoro TTS. Saves the output to `artifacts/audio/{uu
 
 ### `stock_video_service.py` — Step 4
 
-Iterates over keywords from the idea JSON, makes Pexels API search calls, and downloads 3–5 MP4 clips per keyword. Includes validation: skips corrupt/empty clips, handles network errors gracefully.
+Iterates over keywords from the idea JSON, makes Pixabay API search calls, and downloads MP4 clips per keyword. Includes validation: skips corrupt/empty clips, handles network errors gracefully.
 
 ---
 
@@ -295,11 +295,16 @@ Reads the script text and audio duration. Splits the script into 8–12 word chu
 
 ### `video_service.py` — Steps 6 & 7
 
-**Phase 1 (MoviePy):** Loads each stock clip → resizes to 1080×1920 portrait → trims → concatenates → overlays MP3 audio track → adjusts total duration to match audio.
+**Phase 1 (MoviePy):** Loads each stock clip at a bounded Pixabay resolution, crops it to the selected canvas, trims, concatenates, overlays the audio track, and adjusts the total duration. The UI supports:
+
+- **YouTube Short:** 1080×1920 (9:16 portrait)
+- **Long Video:** 1280×720 (16:9 landscape)
+
+The selected format is sent to the API as `video_format` and controls both Pixabay orientation and final rendering dimensions.
 
 **Phase 2 (FFmpeg):** Burns the `.SRT` subtitle file into the video using FFmpeg's `subtitles` filter, producing the final hardcoded-subtitle MP4.
 
-> ⚠️ **Real Bug Fixed:** Some Pexels clips had no usable frames. Added clip validation before assembly — if too few clips, loops existing clips to fill duration.
+> ⚠️ **Real Bug Fixed:** Some Pixabay clips had no usable frames. Added clip validation before assembly — if too few clips, loops existing clips to fill duration.
 
 ---
 
@@ -381,7 +386,7 @@ Handles the OAuth 2.0 callback. The callback URL receives the authorization code
 - Define the full pipeline: idea → script → voice → footage → subtitles → video → upload
 - Choose technology stack
 - Sketch folder structure
-- Sign up for all required APIs: Google AI Studio, Pexels, YouTube/Google Cloud Console
+- Sign up for all required APIs: Google AI Studio, Pixabay, YouTube/Google Cloud Console
 - Decide on artifact storage: local disk in `artifacts/` folder
 
 ### Phase 2: Project Initialization
@@ -494,7 +499,7 @@ app/main.py
               ├── app/services/voice_service.py
               │     └── app/core/config.py
               ├── app/services/stock_video_service.py
-              │     └── app/core/config.py  (Pexels API key)
+              │     └── app/core/config.py  (Pixabay API key)
               ├── app/services/subtitle_service.py
               ├── app/services/video_service.py
               │     └── app/utils/ffmpeg_utils.py
@@ -537,7 +542,7 @@ app/main.py
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-PEXELS_API_KEY=your_pexels_api_key_here
+PIXABAY_API_KEY=your_pixabay_api_key_here
 YOUTUBE_CLIENT_ID=your_oauth_client_id
 YOUTUBE_CLIENT_SECRET=your_oauth_client_secret
 YOUTUBE_REDIRECT_URI=http://localhost:8000/api/youtube/callback
@@ -566,7 +571,7 @@ pytest
 | API | Where to Get |
 |---|---|
 | Gemini API Key | [Google AI Studio](https://aistudio.google.com/app/apikey) |
-| Pexels API Key | [Pexels API](https://www.pexels.com/api/) |
+| Pixabay API Key | [Pixabay API](https://pixabay.com/api/docs/) |
 | YouTube OAuth Credentials | [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials |
 
 ---
@@ -625,7 +630,7 @@ pytest
 |---|---|---|
 | **Gemini Model Migration** | Google deprecated the original model mid-project | Because all AI calls were centralized in `gemini_service.py`, only one file needed updating. **Lesson:** Always abstract external APIs. |
 | **FFmpeg Subtitle Rendering** | MoviePy couldn't reliably burn subtitles | Used FFmpeg directly via subprocess for subtitle burning, kept MoviePy for clip assembly. **Lesson:** Use the right tool for each job. |
-| **Empty Video Clips** | Some Pexels results were corrupt or had no frames | Added clip validation in `stock_video_service.py` before passing to `video_service.py`. **Lesson:** Never trust external API responses. |
+| **Empty Video Clips** | Some Pixabay results were corrupt or had no frames | Added clip validation in `stock_video_service.py` before passing to `video_service.py`. **Lesson:** Never trust external API responses. |
 | **YouTube OAuth Setup** | OAuth redirect URI must exactly match Google Console registration | Documented setup steps clearly. Common source of confusion for new developers. |
 | **Python Version Compatibility** | Kokoro TTS required specific Python version | Locked Python to 3.11 in documentation and CI/CD. |
 | **Frontend-Backend Sync** | Frontend needed to know when pipeline completed | Pipeline blocks synchronously and returns full result. Works for MVP — replace with WebSockets for production. |
@@ -638,7 +643,7 @@ pytest
 
 - Python 3.11
 - Git
-- API keys for: Gemini, Pexels, YouTube (see [Configuration Files](#9-configuration-files))
+- API keys for: Gemini, Pixabay, YouTube (see [Configuration Files](#9-configuration-files))
 
 ### Installation
 
@@ -688,7 +693,7 @@ On the first run, the YouTube OAuth flow will open a browser window asking you t
 2. `pipeline_service.py` orchestrates 8 services in sequence
 3. Gemini AI generates the idea + script
 4. Kokoro TTS converts script to audio
-5. Pexels provides stock footage
+5. Pixabay provides stock footage
 6. MoviePy + FFmpeg assemble and render the final video
 7. YouTube API uploads it
 8. You get a video URL back in your browser

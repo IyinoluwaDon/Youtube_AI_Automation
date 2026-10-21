@@ -5,6 +5,10 @@ async function generateVideo() {
         .value
         .trim();
 
+    const videoFormat = document
+        .getElementById("videoFormat")
+        .value;
+
     if (!niche) {
 
         alert("Please enter a niche");
@@ -127,7 +131,8 @@ async function generateVideo() {
 
                     body: JSON.stringify({
 
-                        niche: niche
+                        niche: niche,
+                        video_format: videoFormat
                     })
                 }
             );

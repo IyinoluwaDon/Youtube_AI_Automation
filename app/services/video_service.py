@@ -11,11 +11,30 @@ from app.core.logger import logger
 
 class VideoService:
 
+    @staticmethod
+    def _fit_to_canvas(clip, width: int, height: int):
+        target_ratio = width / height
+        source_ratio = clip.w / clip.h
+
+        if source_ratio > target_ratio:
+            clip = clip.resized(height=height)
+        else:
+            clip = clip.resized(width=width)
+
+        return clip.cropped(
+            x_center=clip.w / 2,
+            y_center=clip.h / 2,
+            width=width,
+            height=height
+        )
+
     def create_video(
         self,
         video_files: list,
         audio_file: str,
-        output_file: str
+        output_file: str,
+        width: int,
+        height: int
     ):
 
         logger.info(
@@ -48,7 +67,14 @@ class VideoService:
             for file in video_files:
 
                 clip = VideoFileClip(
-                    str(file)
+                    str(file),
+                    target_resolution=(height, width)
+                )
+
+                clip = self._fit_to_canvas(
+                    clip,
+                    width,
+                    height
                 )
 
                 clips.append(

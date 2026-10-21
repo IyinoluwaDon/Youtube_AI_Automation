@@ -28,6 +28,11 @@ input {
     padding: 12px;
 }
 
+select {
+
+    padding: 12px;
+}
+
 button {
 
     padding: 12px 20px;

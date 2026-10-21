@@ -34,6 +34,19 @@ from app.utils.helpers import (
     ensure_artifact_folders
 )
 
+VIDEO_FORMATS = {
+    "short": {
+        "width": 1080,
+        "height": 1920,
+        "orientation": "vertical"
+    },
+    "long": {
+        "width": 1280,
+        "height": 720,
+        "orientation": "horizontal"
+    }
+}
+
 
 class PipelineService:
 
@@ -63,8 +76,16 @@ class PipelineService:
 
     def run(
         self,
-        niche
+        niche,
+        video_format="short"
     ):
+
+        if video_format not in VIDEO_FORMATS:
+            raise ValueError(
+                f"Unsupported video format: {video_format}"
+            )
+
+        profile = VIDEO_FORMATS[video_format]
 
         ensure_artifact_folders()
 
@@ -97,7 +118,8 @@ class PipelineService:
         clips = (
             self.stock_service
             .download_clips(
-                idea["keywords"]
+                idea["keywords"],
+                profile["orientation"]
             )
         )
 
@@ -113,9 +135,9 @@ class PipelineService:
 No stock videos downloaded.
 
 Check:
-1. PEXELS_API_KEY
+1. PIXABAY_API_KEY
 2. Internet Connection
-3. Pexels API Response
+3. Pixabay API Response
                 """
             )
 
@@ -135,7 +157,9 @@ Check:
             .create_video(
                 clips,
                 audio,
-                "artifacts/rendered_videos/raw.mp4"
+                f"artifacts/rendered_videos/{video_format}_raw.mp4",
+                profile["width"],
+                profile["height"]
             )
         )
 
@@ -143,7 +167,7 @@ Check:
         final_video = burn_subtitles(
             str(raw_video),
             str(subtitle),
-            "artifacts/rendered_videos/final.mp4"
+            f"artifacts/rendered_videos/{video_format}_final.mp4"
         )
 
         # Upload To YouTube
