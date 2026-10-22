@@ -1,3 +1,5 @@
+> Current status: provider-dependent prototype. Read [TESTING.md](TESTING.md) before running integration exercises: some can generate content or publish a YouTube video. Offline test discovery is safe; end-to-end provider operation has not been validated by this maintenance pass.
+
 # 🎬 YouTube AI Automation
 
 > **From niche to published YouTube Short — fully automated.**
