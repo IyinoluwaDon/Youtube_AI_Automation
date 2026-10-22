@@ -9,3 +9,9 @@ artifacts/stock_videos/*
 artifacts/subtitles/*
 artifacts/thumbnails/*
 artifacts/scripts/*
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*_TEMP_*
+*TEMP_MPY*
