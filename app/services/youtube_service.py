@@ -1,3 +1,4 @@
+import json
 import os
 
 from google.auth.transport.requests import Request
@@ -71,6 +72,20 @@ class YouTubeService:
 
             else:
 
+                with open(
+                    settings.YOUTUBE_CLIENT_SECRET_FILE,
+                    encoding="utf-8"
+                ) as client_secret:
+                    client_config = json.load(client_secret)
+
+                if "installed" not in client_config:
+                    raise ValueError(
+                        "YouTube OAuth requires a Desktop app client. "
+                        f"Replace '{settings.YOUTUBE_CLIENT_SECRET_FILE}' "
+                        "with a Google OAuth client JSON whose top-level "
+                        "key is 'installed', then delete token.json and retry."
+                    )
+
                 flow = (
                     InstalledAppFlow
                     .from_client_secrets_file(
@@ -81,7 +96,8 @@ class YouTubeService:
 
                 creds = (
                     flow.run_local_server(
-                        port=0
+                        host="localhost",
+                        port=8765
                     )
                 )
 

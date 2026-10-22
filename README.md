@@ -387,6 +387,7 @@ Handles the OAuth 2.0 callback. The callback URL receives the authorization code
 - Choose technology stack
 - Sketch folder structure
 - Sign up for all required APIs: Google AI Studio, Pixabay, YouTube/Google Cloud Console
+- For YouTube uploads, create an OAuth client of type **Desktop app**, download its JSON as `client_secret.json`, and delete any old `token.json` before the first authorization.
 - Decide on artifact storage: local disk in `artifacts/` folder
 
 ### Phase 2: Project Initialization
