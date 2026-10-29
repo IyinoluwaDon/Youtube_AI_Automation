@@ -538,9 +538,10 @@ app/main.py
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 PEXELS_API_KEY=your_pexels_api_key_here
-YOUTUBE_CLIENT_ID=your_oauth_client_id
-YOUTUBE_CLIENT_SECRET=your_oauth_client_secret
-YOUTUBE_REDIRECT_URI=http://localhost:8000/api/youtube/callback
+PIXABAY_API_KEY=your_pixabay_api_key_here
+YOUTUBE_CLIENT_SECRET_FILE=client_secret.json
+OUTPUT_DIR=artifacts
+LOG_LEVEL=INFO
 ```
 
 > ⚠️ **Never commit `.env` to Git.** Add it to `.gitignore` immediately.
